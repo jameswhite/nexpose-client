@@ -29,7 +29,7 @@ nsc.sites.each do |site|
   end
 end
 
-vulns.keys each do |v|
+vulns.keys.each do |v|
   $stdout.puts "#{device_vuln.id} #{vulns[device_vuln.id][:details].title} #{vulns[device_vuln.id][:details].cvss_score} #{vulns[device_vuln.id][:details].cvss_vector} affects: #{vulns[device_vuln.id][:affectsbyhost].length}"
   $stdout.puts "#{vulns[device_vuln.id][:affects].join(',')}"
 end
