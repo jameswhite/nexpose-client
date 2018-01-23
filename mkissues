@@ -1,0 +1,35 @@
+#!/bin/bash
+i=1
+while [ $i -lt $(grep "^vulnerability: " output | wc -l) ]; do
+  FIRSTLINE=$(
+              egrep -A1 "^vulnerability" output | \
+              grep -v -- '--'                 | \
+              head -$(echo "$i * 2"|bc)       | \
+              tail -2                         | \
+              grep "^vulnerability: "
+            )
+  LASTLINE=$(
+              egrep -A1 "^vulnerability:" output | \
+              grep -v -- '--'                 | \
+              head -$(echo "$i * 2"|bc)       | \
+              tail -2                         | \
+              grep "^affects: "
+            )
+  VULN=$(echo "${FIRSTLINE}" | sed -e 's/^vulnerability: //'  -e 's/^[^[:space:]]* //' -e 's/ [0-9]*\.[0-9] (.*) affects: [0-9]*//')
+  HANDLE=$(echo "${FIRSTLINE}" | sed -e 's/^vulnerability: //'  -e 's/ .*//')
+  SCORE=$(echo "${FIRSTLINE}" | sed -e 's/^vulnerability: //'  -e 's/^[^[:space:]]* //' -e 's/.* \([0-9]*\.[0-9]\) (.*) affects: [0-9]*/\1/')
+  LABELS="[\"$(echo "${FIRSTLINE}" | sed -e 's/^vulnerability: //'  -e 's/^[^[:space:]]* //' -e 's/.* [0-9]*\.[0-9] (\(.*\)) affects: [0-9]*/\1/'|sed -e 's/\//","/g')\"]"
+  AFFECTS=$(echo "${FIRSTLINE}" | sed -e 's/.* affects: \([0-9]*\)/\1/')
+  BODY="- [ ] $(echo "${LASTLINE}" | sed -e 's/^affects: //' -e 's/, */\\n\- [ ] /g')"
+  echo
+  echo "count: [$i]"
+  echo "${FIRSTLINE}"
+  echo "handle: $HANDLE"
+  echo "title: $VULN"
+  echo "score: $SCORE"
+  echo "labels: $LABELS"
+  echo "affects: $AFFECTS"
+  echo -e "${BODY}"
+  # sleep 1;
+  i=$(expr $i + 1)
+done
