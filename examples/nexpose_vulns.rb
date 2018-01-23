@@ -13,7 +13,7 @@ nsc.sites.each do |site|
   count = 0
   # Loop through the assets (hosts, switches, etc.) and list their vulns, and make a hash with a key of the vuln with a list of the hosts
   nsc.list_site_devices(site.id).each do |asset|
-    # next if count > 10 # 10 per site until we get a good run
+    next if count > 10 # 10 per site until we get a good run
     count += count + 1
     hostname = nsc.asset_scan_history(asset.id).last.host_name
     $stderr.puts "  #{hostname} (#{asset.address}):" 
@@ -37,6 +37,7 @@ end
 
 # Now go through all the vulns, print a summary on one line and the affected hostnames(IPs) on the line that follows
 vulns.keys.each do |device_vuln_id|
-  $stdout.puts "#{device_vuln_id} #{vulns[device_vuln_id][:details].title} #{vulns[device_vuln_id][:details].cvss_score} #{vulns[device_vuln_id][:details].cvss_vector} affects: #{vulns[device_vuln_id][:affectsbyhost].length}"
-  $stdout.puts "#{vulns[device_vuln_id][:affects].join(',')}"
+  $stdout.puts "vulnerability: #{device_vuln_id} #{vulns[device_vuln_id][:details].title} #{vulns[device_vuln_id][:details].cvss_score} #{vulns[device_vuln_id][:details].cvss_vector} affects: #{vulns[device_vuln_id][:affectsbyhost].length}"
+  $stdout.puts "affects: #{vulns[device_vuln_id][:affects].join(',')}"
+  $stdout.puts
 end
